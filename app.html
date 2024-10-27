@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App - API Client</title>
+<style>
+/* Basic styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container for the app */
+.container {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #ffcc00;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+button {
+    background-color: #ff6666;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #ff9999;
+}
+
+/* Weather Display */
+.weather-result {
+    margin-top: 20px;
+    font-size: 1.5rem;
+}
+
+.error-message {
+    color: #ffcccc;
+    margin-top: 20px;
+}
+
+/* Page 2 styles */
+.next-page {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="page1">
+    <h1>Weather App</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <button id="getWeatherBtn">Get Weather</button>
+    <div class="error-message" id="errorMessage"></div>
+</div>
+
+<div class="next-page" id="page2" style="display: none;">
+    <h1>Weather in <span id="cityName"></span></h1>
+    <div class="weather-result" id="weatherResult"></div>
+</div>
+
+<script>
+// Use the provided API key
+const apiKey = '04371fd5b240fe36d381b9ec8c29d9e8';
+
+document.getElementById('getWeatherBtn').addEventListener('click', function() {
+    const city = document.getElementById('cityInput').value;
+    if (city) {
+        getWeather(city);
+    } else {
+        document.getElementById('errorMessage').innerText = 'Please enter a city name.';
+    }
+});
+
+async function getWeather(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    try {
+        const response = await fetch(url);
+        console.log("Fetching weather data..."); // Debugging log
+        if (!response.ok) throw new Error('City not found');
+        
+        const data = await response.json();
+        console.log(data); // Debugging log to verify data
+        
+        displayWeather(data);
+        document.getElementById('errorMessage').innerText = '';
+    } catch (error) {
+        console.error("Error:", error.message); // Debugging log
+        document.getElementById('weatherResult').innerHTML = '';
+        document.getElementById('errorMessage').innerText = 'City not found. Please try again.';
+    }
+}
+
+function displayWeather(data) {
+    document.getElementById('page1').style.display = 'none';
+    document.getElementById('page2').style.display = 'block';
+
+    document.getElementById('cityName').innerText = data.name;
+    document.getElementById('weatherResult').innerHTML = `
+        <div class="weather-data">
+            <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
+            <p><strong>Weather:</strong> ${data.weather[0].description}</p>
+            <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
+            <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
